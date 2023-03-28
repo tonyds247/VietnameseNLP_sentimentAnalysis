@@ -48,7 +48,7 @@ def xuly_vni(df):
             for sentence in sent_tokenize(document):
                 # if not(sentence.isascii()):
                 ###### CONVERT EMOJICON
-                sentence = ''.join(emoji_dict[word]+' ' if word in emoji_dict else word for word in list(sentence))
+                sentence = ''.join(emoji_dict[word] + ' ' if word in emoji_dict else word for word in list(sentence))
                 ###### CONVERT TEENCODE
                 sentence = ' '.join(teen_dict[word] if word in teen_dict else word for word in sentence.split())
                 ###### DEL Punctuation & Numbers
@@ -65,6 +65,11 @@ def xuly_vni(df):
             return document
         df['processed_text'] = df['comment'].apply(lambda x: process_text(x, emoji_dict, teen_dict, wrong_lst))
 
+        # Remove HTTP links
+        df['processed_text'] = df['processed_text'].replace(
+        r'((http|https)\:\/\/)?[a-zA-Z0-9\.\/\?\:@\-_=#]+\.([a-zA-Z]){2,6}([a-zA-Z0-9\.\&\/\?\:@\-_=#])*', '',
+        regex=True)
+        
         # Chuẩn hóa unicode tiếng việt
         def loaddicchar():
             uniChars = "àáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệđìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵÀÁẢÃẠÂẦẤẨẪẬĂẰẮẲẴẶÈÉẺẼẸÊỀẾỂỄỆĐÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴÂĂĐÔƠƯ"
@@ -93,15 +98,15 @@ def xuly_vni(df):
             new_text = ''
             text_lst = text.split()
             i= 0
-            if 'không' in text_lst:
+            if 'không' in text_lst or 'rất' in text_lst or 'quá' in text_lst or 'gần' in text_lst or 'sai' in text_lst or 'bị' in text_lst or 'như' in text_lst or 'cũng' in text_lst or 'hơi' in text_lst:
                 while i <= len(text_lst) - 1:
                     word = text_lst[i]
                     #print(word)
                     #print(i)
-                    if  word == 'không':
+                    if  word in ['không','rất','quá','gần','sai','bị','như','y','cũng','hơi']:
                         next_idx = i+1
                         if next_idx <= len(text_lst) -1:
-                            word = word +'_'+ text_lst[next_idx]
+                            word = ' ' + word +'_'+ text_lst[next_idx]
                         i= next_idx + 1
                     else:
                         i = i+1
